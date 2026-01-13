@@ -1,0 +1,76 @@
+import json
+import os
+
+class Employee:
+    def __init__(self, emp_id, name, basic_salary):
+        self.emp_id = emp_id
+        self.name = name
+        self.basic_salary = basic_salary
+
+    def calculate_salary(self):
+        hra = 0.20 * self.basic_salary
+        tax = 0.10 * self.basic_salary
+        return self.basic_salary + hra - tax
+
+    def to_dict(self):
+        return {
+            "emp_id": self.emp_id,
+            "name": self.name,
+            "basic_salary": self.basic_salary
+        }
+
+
+class PayrollSystem:
+    FILE_NAME = "employees.json"
+
+    def __init__(self):
+        self.employees = self.load_data()
+
+    def load_data(self):
+        if os.path.exists(self.FILE_NAME):
+            with open(self.FILE_NAME, "r") as file:
+                return json.load(file)
+        return {}
+
+    def save_data(self):
+        with open(self.FILE_NAME, "w") as file:
+            json.dump(self.employees, file, indent=4)
+
+    def add_employee(self):
+        emp_id = input("Enter Employee ID: ")
+        name = input("Enter Name: ")
+        salary = float(input("Enter Basic Salary: "))
+
+        emp = Employee(emp_id, name, salary)
+        self.employees[emp_id] = emp.to_dict()
+        self.save_data()
+        print("Employee added successfully.")
+
+    def view_employees(self):
+        if not self.employees:
+            print("No employee records found.")
+            return
+
+        for e in self.employees.values():
+            emp = Employee(e["emp_id"], e["name"], e["basic_salary"])
+            print(f"ID: {emp.emp_id}, Name: {emp.name}, Net Salary: ₹{emp.calculate_salary():.2f}")
+
+    def run(self):
+        while True:
+            print("\n1. Add Employee\n2. View Employees\n3. Exit")
+            choice = input("Enter choice: ")
+
+            if choice == "1":
+                self.add_employee()
+            elif choice == "2":
+                self.view_employees()
+            elif choice == "3":
+                print("Exiting Payroll System.")
+                break
+            else:
+                print("Invalid choice.")
+
+
+if __name__ == "__main__":
+    system = PayrollSystem()
+    system.run()
